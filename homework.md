@@ -1,33 +1,168 @@
-# homework2
-1. 254  510
-2. 172.19.32.0/23
-3. 100  请用户提出请求
-   200  服务器成功返回页面
-   202  服务器接收请求，但是还没有处理
-   206  返回服务器部分get请求
-   301  网页内容更改到新的网址
-   302  网页内容暂时更改到新的网址
-   304  未修改
-   400  服务器不理解请求的语法（语法错误）
-   401  浏览需要身份验证的网页内容是返回
-   404  请求网页不存在
-   408  服务器请求超时
-   410  请求内容被删除
-   413  请求的内容过大，超出服务器的能力
-   416  请求范围不符合要求
-   500  服务器内部错误
-   503  服务器暂时不可用  
-4. tcp 通过3次握手建立连接，
-         客户主机发送SYN连接请求到服务器主机
-         服务器主机返回SYN和ack文件授予链接
-         客户端收到ack后向服务器发送ack报文，并分配资源   
-      通过4次挥手断开连接
-         客户端想服务器端发送FIN 报文
-         服务器端收到报文后服务器端进入FIN_WAIT状态
-         当服务器端确定数据已经发送完成后 向客户端发送FIN报文
-         客户端收到报文后向服务器端发送ack报文并进入TIME_WAIT状态，当服务器端收到ack报文后就可以断开连接了，客户端等待2MSL后没          收到消息则证明客户端已经正常关闭，客户端也断开连接。
-5.TCP/IP协议 中 应用层处理osi中会话层，表示层，应用层的功能
-  TCP/IP协议中传输层并不能保证在输出层可靠的传输数据包
-6.ajax 兼容性好 易学易用 但是对数据传输要求大 浪费资源 
-  Socket 兼容性差 但是对服务器压力小 效率高 
-7.udp 速度快 但是传输可靠性低 适用于传输少量数据
+一、工厂模式
+优点：用一个工厂方法替代直接new一个类的功能 把创建对象的过程封装成一个工厂方法。而当类的一些属性改变了的话，只需要在工厂方法中修改即可，而不需要在每个使用了对象的地方修改。
+例子：
+<?php
+	class Database {
+		public function __construct() {
+			echo 'success';
+		}
+	}
+?>//一个类
+
+<?php
+	include 'db.class.php';
+	
+	class Factory {
+		static function createDatabase() {
+			$db = new Database;
+			return $db;
+		}
+	}
+?>//工厂类
+
+<?php
+	include 'factory.php';
+	
+	$db = Factory::createDatabase();
+?>//在另一个php中用工厂方法实例化这个类；
+二、单例模式
+优点：单例类只能被自身实例化，而不能在其他类中实例化；
+          主要应用在数据库应用中，使用单利模式可以避免大量new 操作 是对系统资源		  的节省。
+例子：
+<?php
+	class Database {
+		protected static $db;
+		private   function __construct() {
+			echo 'success';
+		}
+		static function getInstance() {
+			if (self::$db) {
+				return self::$db;
+			} else {
+				self::$db = new self();
+				return self::$db;
+			}
+		}
+	}
+?>//一个单例模式的类
+<?php
+	include 'db.class.php';
+	
+	$db = Database::getInstance();
+?>//调用这个单例模式的类
+三、迭代器模式
+优点：在不需要了解内部实现的前提下，遍历一个聚合对象内部元素
+  支持对聚合对象的多种遍历
+  为遍历不同的聚合结构提供一个统一的接口
+网上的例子。。。。。。：
+<?php  
+header("Content-Type:text/html;charset=utf-8");   
+//抽象迭代器  
+abstract class IIterator  
+{  
+    public abstract function First();  
+    public abstract function Next();  
+    public abstract function IsDone();  
+    public abstract function CurrentItem();  
+}  
+  
+//具体迭代器  
+class ConcreteIterator extends IIterator  
+{  
+    private $aggre;  
+    private $current = 0;  
+    public function __construct(array $_aggre)  
+    {  
+        $this->aggre = $_aggre;  
+    }  
+    //返回第一个  
+    public function First()  
+    {  
+        return $this->aggre[0];  
+    }  
+  
+    //返回下一个  
+    public function  Next()  
+    {  
+        $this->current++;  
+        if($this->current<count($this->aggre))  
+        {  
+            return $this->aggre[$this->current];  
+        }  
+        return false;  
+    }  
+  
+    //返回是否IsDone  
+    public function IsDone()  
+    {  
+        return $this->current>=count($this->aggre)?true:false;  
+    }  
+  
+    //返回当前聚集对象  
+    public function CurrentItem()  
+    {  
+        return $this->aggre[$this->current];  
+    }  
+}  
+
+          
+
+$iterator= new ConcreteIterator(array('周杰伦','王菲','周润发'));  
+$item = $iterator->First();  
+echo $item."<br/>";  
+while(!$iterator->IsDone())  
+{  
+    echo "{$iterator->CurrentItem()}：请买票！<br/>";  
+    $iterator->Next();  
+}  ?>
+四、观察者模式
+例子：<?php
+class Event{ 
+    private $_observers = array();
+ 
+    public function register($sub){ //  注册观察者 
+        $this->_observers[] = $sub;
+    }
+ 
+     
+    public function trigger(){  
+        if(!empty($this->_observers)){
+            foreach($this->_observers as $observer){
+                $observer->update();
+            }
+        }
+    }
+}
+ 
+
+interface Observerable{	
+    public function update();
+}
+ 
+class Subscriber implements Observerable{
+    public function update(){
+        echo "逻辑1";
+    }
+}
+ 
+
+$paper = new Event();
+$paper->register(new Subscriber());
+$paper->trigger();
+?>
+当一个对象状态发生改变时，依赖他的对象会全部收到通知，并自动更新
+观察者模式实现了低耦合，非侵入式的通知与更新机制。。。。。。
+五、注册树模式
+优点：在需要调用某个对象的时候，直接从注册树上取一下就好，像使用全局变量一样方便实用
+例子：<?php
+	class 	register {
+		protected static $objects;
+		static function set($alias,$object) {
+			self::$objects[$alias] = $object;
+		}
+		function _unset() {
+			unset(self::$objects[$alias]);
+		}
+	}
+
+?>
